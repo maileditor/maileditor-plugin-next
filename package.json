@@ -1,8 +1,8 @@
 {
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "start": "next start",
+    "dev": "next dev -p 4000",
+    "start": "next start -p 4000",
     "build": "next build",
     "prepare": "husky",
     "tc": "tsc --noEmit --watch",
@@ -16,8 +16,10 @@
     "lucide-react": "^1",
     "next": "^16",
     "next-themes": "^0",
+    "radix-ui": "^1.6.7",
     "react": "^19",
     "react-dom": "^19",
+    "server-only": "^0.0.1",
     "tailwind-merge": "^3"
   },
   "devDependencies": {
@@ -44,6 +46,7 @@
     "prettier-plugin-organize-imports": "^4",
     "prettier-plugin-tailwindcss": "^0",
     "tailwindcss": "^4",
+    "tw-animate-css": "^1.4.0",
     "typescript": "^5",
     "typescript-eslint": "^8"
   },
