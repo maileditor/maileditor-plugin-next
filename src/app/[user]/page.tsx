@@ -1,64 +1,94 @@
-import { getEditorUrl, getTemplates } from '@/app/actions'
+import { listTemplates } from '@/api/plugin-backend'
+import { ApiError } from '@/components/api-error'
+import { AppHeader } from '@/components/app-header'
+import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { HOST_USERS } from '@/constants/host-users'
+import { formatDate } from '@/lib/format-date'
+import { PluginTemplate } from '@/types/plugin'
 import Link from 'next/link'
 
 interface PageProps {
   params: Promise<{ user: string }>
-  searchParams: Promise<{ templateId?: string }>
 }
 
-export default async function Page({ params, searchParams }: PageProps) {
+export default async function Page({ params }: PageProps) {
   const { user } = await params
-  const { templateId } = await searchParams
+  const hostUser = HOST_USERS.find((candidate) => candidate.id === user)
+  const userHref = `/${encodeURIComponent(user)}`
 
-  const templates = templateId ? [] : await getTemplates(user)
+  let templates: PluginTemplate[] = []
+  let error: unknown = null
+
+  try {
+    templates = await listTemplates(user)
+  } catch (caught) {
+    error = caught
+  }
 
   return (
-    <div className="flex h-dvh flex-col">
-      <header className="flex h-14 shrink-0 items-center justify-between border-b px-6">
-        <Link href={templateId ? `/${user}` : '/'} className="text-sm">
-          ← {templateId ? 'Templates' : 'Users'}
-        </Link>
+    <div className="flex min-h-dvh flex-col">
+      <AppHeader
+        backHref="/"
+        backLabel="Users"
+        right={<span>{hostUser?.name ?? user}</span>}
+      />
 
-        <span className="text-muted-foreground text-sm">
-          Signed in as{' '}
-          <span className="text-foreground capitalize">{user}</span>
-        </span>
-      </header>
+      <main className="mx-auto w-full max-w-4xl px-6 py-10">
+        <div className="flex items-center justify-between gap-4">
+          <h1 className="text-xl font-semibold tracking-tight">Templates</h1>
+          <div className="flex items-center gap-2">
+            <form action={`${userHref}/sample`} method="post">
+              <Button type="submit" variant="outline" size="sm">
+                Copy from gallery
+              </Button>
+            </form>
+            <Button asChild size="sm">
+              <Link href={`${userHref}/new`}>New template</Link>
+            </Button>
+          </div>
+        </div>
 
-      {templateId ? (
-        <iframe
-          title="MailEditor"
-          src={await getEditorUrl(user, templateId)}
-          className="min-h-0 flex-1 border-0 bg-white"
-        />
-      ) : (
-        <main className="mx-auto w-full max-w-4xl overflow-y-auto px-6 py-10">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {templates.map((template) => (
-              <Link
-                key={template.id}
-                href={`/${user}?templateId=${template.id}`}
-              >
-                <Card className="gap-0 overflow-hidden py-0 transition-shadow hover:shadow-md">
-                  <div className="bg-muted aspect-[16/10]">
-                    {template.thumbnail ? (
-                      <img
-                        src={template.thumbnail}
-                        alt=""
-                        className="h-full w-full object-cover object-top"
-                      />
-                    ) : null}
-                  </div>
-                  <p className="truncate border-t px-4 py-3 text-sm font-medium">
+        {error ? (
+          <div className="mt-6">
+            <ApiError error={error} />
+          </div>
+        ) : null}
+
+        {!error && templates.length === 0 ? (
+          <p className="text-muted-foreground mt-10 text-sm">
+            Nothing here yet. Copy from gallery takes a real template out of
+            MailEditor&apos;s prebuilt gallery and saves it to this user, or
+            start from scratch with New template.
+          </p>
+        ) : null}
+
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {templates.map((template) => (
+            <Link key={template.id} href={`${userHref}/${template.id}`}>
+              <Card className="gap-0 overflow-hidden py-0 transition-shadow hover:shadow-md">
+                <div className="bg-muted aspect-[16/10]">
+                  {template.thumbnail ? (
+                    <img
+                      src={template.thumbnail}
+                      alt=""
+                      className="h-full w-full object-cover object-top"
+                    />
+                  ) : null}
+                </div>
+                <div className="border-t px-4 py-3">
+                  <p className="truncate text-sm font-medium">
                     {template.name}
                   </p>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </main>
-      )}
+                  <p className="text-muted-foreground mt-0.5 text-xs">
+                    {formatDate(template.updated_at)}
+                  </p>
+                </div>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </main>
     </div>
   )
 }

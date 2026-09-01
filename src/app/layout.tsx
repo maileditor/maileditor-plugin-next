@@ -5,7 +5,7 @@ import { ThemeProvider } from 'next-themes'
 import { PropsWithChildren } from 'react'
 
 export const metadata: Metadata = {
-  title: 'Acme Mail — MailEditor Plugin Host',
+  title: 'Sendwell — MailEditor plugin host',
   description: 'Reference host integration for the MailEditor plugin',
 }
 
