@@ -17,7 +17,7 @@ interface EditorAuth {
   pluginVersion: string
 }
 
-const EditorAuthContext = createContext<EditorAuth | null>(null)
+const EditorAuthContext = createContext<EditorAuth>(null!)
 
 export function EditorAuthProvider({
   user,
@@ -65,8 +65,6 @@ export function EditorAuthProvider({
 
 export function useEditorUrl(templateId?: number) {
   const auth = useContext(EditorAuthContext)
-
-  if (!auth) return null
 
   const params = new URLSearchParams({
     external_user_id: auth.externalUserId,
