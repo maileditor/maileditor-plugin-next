@@ -17,8 +17,8 @@ export default async function Page({ params }: PageProps) {
   return (
     <div className="flex h-dvh flex-col">
       <AppHeader
-        backHref={`/${encodeURIComponent(user)}/${id}`}
-        backLabel="Template"
+        backHref={`/${encodeURIComponent(user)}`}
+        backLabel="Templates"
         right={<span>Editing as {user}</span>}
       />
       <EditorFrame src={buildEditorUrl(user, id)} />
