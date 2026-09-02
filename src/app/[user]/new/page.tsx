@@ -1,12 +1,17 @@
+'use client'
+
 import { AppHeader } from '@/components/app-header'
 import { HOST_USERS } from '@/constants/host-users'
+import { use } from 'react'
+import { useEditorUrl } from '../auth-context'
 
 interface PageProps {
   params: Promise<{ user: string }>
 }
 
-export default async function Page({ params }: PageProps) {
-  const { user } = await params
+export default function Page({ params }: PageProps) {
+  const { user } = use(params)
+  const editorUrl = useEditorUrl()
   const hostUser = HOST_USERS.find((candidate) => candidate.id === user)
 
   return (
@@ -16,12 +21,14 @@ export default async function Page({ params }: PageProps) {
         backLabel="Templates"
         right={<span>New template for {hostUser?.name ?? user}</span>}
       />
-      <iframe
-        title="MailEditor"
-        src={`/api/editor-url?user=${encodeURIComponent(user)}`}
-        allow="clipboard-write; fullscreen"
-        className="min-h-0 w-full flex-1 border-0 bg-white"
-      />
+      {editorUrl ? (
+        <iframe
+          title="MailEditor"
+          src={editorUrl}
+          allow="clipboard-write; fullscreen"
+          className="min-h-0 w-full flex-1 border-0 bg-white"
+        />
+      ) : null}
     </div>
   )
 }
