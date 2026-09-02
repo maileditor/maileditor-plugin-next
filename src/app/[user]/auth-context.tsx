@@ -27,15 +27,34 @@ export function EditorAuthProvider({
   children: ReactNode
 }) {
   const [auth, setAuth] = useState<EditorAuth | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function authenticate() {
-      const response = await fetch(`/api/auth?user=${encodeURIComponent(user)}`)
-      setAuth((await response.json()) as EditorAuth)
+      try {
+        const response = await fetch(
+          `/api/auth?user=${encodeURIComponent(user)}`
+        )
+
+        if (!response.ok) {
+          setError(`Could not authenticate this user (${response.status}).`)
+          return
+        }
+
+        setAuth((await response.json()) as EditorAuth)
+      } catch {
+        setError('Could not reach the authentication endpoint.')
+      }
     }
 
     void authenticate()
   }, [user])
+
+  if (error) {
+    return <p className="text-destructive p-6 text-sm">{error}</p>
+  }
+
+  if (!auth) return null
 
   return (
     <EditorAuthContext.Provider value={auth}>
