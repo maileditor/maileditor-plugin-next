@@ -1,6 +1,5 @@
 import { buildEditorUrl } from '@/api/editor-url'
 import { AppHeader } from '@/components/app-header'
-import { EditorFrame } from '@/components/editor-frame'
 import { parseTemplateId } from '@/lib/template-id'
 import { notFound } from 'next/navigation'
 
@@ -21,7 +20,12 @@ export default async function Page({ params }: PageProps) {
         backLabel="Templates"
         right={<span>Editing as {user}</span>}
       />
-      <EditorFrame src={buildEditorUrl(user, id)} />
+      <iframe
+        title="MailEditor"
+        src={buildEditorUrl(user, id)}
+        allow="clipboard-write; fullscreen"
+        className="min-h-0 w-full flex-1 border-0 bg-white"
+      />
     </div>
   )
 }
