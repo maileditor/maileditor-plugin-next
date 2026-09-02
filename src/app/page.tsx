@@ -1,11 +1,22 @@
-import { listUsers } from '@/api/plugin-backend'
+'use client'
+
 import { HOST_USERS } from '@/constants/host-users'
 import { formatDate } from '@/lib/format-date'
+import { PluginUser } from '@/types/plugin'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 
-export default async function Page() {
-  const apiUsers = await listUsers()
-  const byId = new Map(apiUsers.map((user) => [user.external_user_id, user]))
+export default function Page() {
+  const [apiUsers, setApiUsers] = useState<PluginUser[] | null>(null)
+
+  useEffect(() => {
+    async function load() {
+      const response = await fetch('/api/users')
+      setApiUsers((await response.json()) as PluginUser[])
+    }
+
+    void load()
+  }, [])
 
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-16">
@@ -16,7 +27,9 @@ export default async function Page() {
 
       <div className="mt-8 flex flex-col gap-2">
         {HOST_USERS.map((hostUser) => {
-          const stats = byId.get(hostUser.id)
+          const stats = apiUsers?.find(
+            (user) => user.external_user_id === hostUser.id
+          )
 
           return (
             <Link
@@ -37,7 +50,9 @@ export default async function Page() {
               </div>
               <div className="shrink-0 text-right">
                 <p className="text-sm">
-                  {stats?.template_count ?? 0} templates
+                  {apiUsers === null
+                    ? '…'
+                    : `${stats?.template_count ?? 0} templates`}
                 </p>
                 <p className="text-muted-foreground text-xs">
                   Last saved {formatDate(stats?.last_activity_at ?? null)}

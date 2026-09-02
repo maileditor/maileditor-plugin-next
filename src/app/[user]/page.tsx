@@ -1,20 +1,35 @@
-import { listTemplates } from '@/api/plugin-backend'
+'use client'
+
 import { AppHeader } from '@/components/app-header'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { HOST_USERS } from '@/constants/host-users'
 import { formatDate } from '@/lib/format-date'
+import { PluginTemplate } from '@/types/plugin'
 import Link from 'next/link'
+import { use, useEffect, useState } from 'react'
 
 interface PageProps {
   params: Promise<{ user: string }>
 }
 
-export default async function Page({ params }: PageProps) {
-  const { user } = await params
+export default function Page({ params }: PageProps) {
+  const { user } = use(params)
+  const [templates, setTemplates] = useState<PluginTemplate[] | null>(null)
+
+  useEffect(() => {
+    async function load() {
+      const response = await fetch(
+        `/api/templates?user=${encodeURIComponent(user)}`
+      )
+      setTemplates((await response.json()) as PluginTemplate[])
+    }
+
+    void load()
+  }, [user])
+
   const hostUser = HOST_USERS.find((candidate) => candidate.id === user)
   const userHref = `/${encodeURIComponent(user)}`
-  const templates = await listTemplates(user)
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -32,14 +47,14 @@ export default async function Page({ params }: PageProps) {
           </Button>
         </div>
 
-        {templates.length === 0 ? (
+        {templates?.length === 0 ? (
           <p className="text-muted-foreground mt-10 text-sm">
             Nothing here yet. Start with New template.
           </p>
         ) : null}
 
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {templates.map((template) => (
+          {(templates ?? []).map((template) => (
             <Link key={template.id} href={`${userHref}/${template.id}/edit`}>
               <Card className="gap-0 overflow-hidden py-0 transition-shadow hover:shadow-md">
                 <div className="bg-muted aspect-[16/10]">

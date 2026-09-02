@@ -1,6 +1,4 @@
-import { buildEditorUrl } from '@/api/editor-url'
 import { AppHeader } from '@/components/app-header'
-import { parseTemplateId } from '@/lib/template-id'
 import { notFound } from 'next/navigation'
 
 interface PageProps {
@@ -9,9 +7,8 @@ interface PageProps {
 
 export default async function Page({ params }: PageProps) {
   const { user, templateId } = await params
-  const id = parseTemplateId(templateId)
 
-  if (id === null) notFound()
+  if (!/^[1-9]\d*$/.test(templateId)) notFound()
 
   return (
     <div className="flex h-dvh flex-col">
@@ -22,7 +19,7 @@ export default async function Page({ params }: PageProps) {
       />
       <iframe
         title="MailEditor"
-        src={buildEditorUrl(user, id)}
+        src={`/api/editor-url?user=${encodeURIComponent(user)}&template_id=${templateId}`}
         allow="clipboard-write; fullscreen"
         className="min-h-0 w-full flex-1 border-0 bg-white"
       />

@@ -1,17 +1,3 @@
-export interface PluginEnvelope<T> {
-  message: string
-  result: T
-}
-
-export interface Paginated<T> {
-  data: T[]
-  meta: {
-    current_page: number
-    per_page: number
-    total: number
-  }
-}
-
 export interface PluginUser {
   external_user_id: string
   template_count: number

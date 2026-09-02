@@ -1,4 +1,3 @@
-import { buildEditorUrl } from '@/api/editor-url'
 import { AppHeader } from '@/components/app-header'
 import { HOST_USERS } from '@/constants/host-users'
 
@@ -19,7 +18,7 @@ export default async function Page({ params }: PageProps) {
       />
       <iframe
         title="MailEditor"
-        src={buildEditorUrl(user)}
+        src={`/api/editor-url?user=${encodeURIComponent(user)}`}
         allow="clipboard-write; fullscreen"
         className="min-h-0 w-full flex-1 border-0 bg-white"
       />
